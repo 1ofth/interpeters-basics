@@ -1,0 +1,93 @@
+%{
+import java.io.*;
+import java.util.List;
+import com.ifmo.interpreter.*;
+%}
+
+%class Parser
+%interface ParserTokens
+
+%token <Integer> NUMBER
+%token <String> NAME
+%token  IF THEN ELSE ASSIGN VAR
+%token  '+' '-' '*' '/' '(' ')' '>' '<' EQUALS
+
+%right ASSIGN
+%left EQUALS
+%left '>' '<'
+%left '+' '-'
+%left '*' '/'
+%right UMINUS
+
+%type <Expr>  expression assign
+%type <Stmt> program declarations statement
+%type <Stmt.Block>  statementList
+%type <Expr.LiteralList> symlist
+
+%start program
+
+%%
+
+program: declarations statementList    { $$ = new Stmt.Block($2, $1); }
+        ;
+
+declarations: VAR symlist ';'			{ $$ = new Stmt.Var($2.list); }
+            ;
+
+statementList: statement ';'		{ $$ = new Stmt.Block($1); }
+            | statementList  statement ';' { $$ = new Stmt.Block($1, $2); }
+	        ;
+
+statement: IF expression THEN statementList ELSE statementList  { $$ = new Stmt.If($2, $4, $6); }
+         | IF expression THEN statementList { $$ = new Stmt.If($2, $4, null); }
+         | assign     { $$ = new Stmt.Expression($1); }
+         ;
+
+assign: NAME ASSIGN expression	{ $$ = new Expr.Assign($1, $3); }
+      ;
+
+expression: expression '>' expression	{ $$ = new Expr.Binary($1, ">", $3); }
+	| expression '<' expression	{ $$ = new Expr.Binary($1, "<", $3); }
+	| expression EQUALS expression	{ $$ = new Expr.Binary($1, "==", $3); }
+	| expression '+' expression	{ $$ = new Expr.Binary($1, "+", $3); }
+	| expression '-' expression	{ $$ = new Expr.Binary($1, "-", $3); }
+	| expression '*' expression	{ $$ = new Expr.Binary($1, "*", $3); }
+	| expression '/' expression { $$ = new Expr.Binary($1, "/", $3); }
+	| '(' expression ')'	{ $$ = new Expr.Grouping($2); }
+	| '-' expression %prec UMINUS	{ $$ = new Expr.Unary("-", $2); }
+	| NUMBER	{ $$ = new Expr.Literal($1); }
+	| NAME		{ $$ = new Expr.Literal($1); }
+	;
+
+symlist: NAME	{ $$ = new Expr.LiteralList($1); }
+	| NAME ',' symlist	{ $$ = new Expr.LiteralList($1, $3); }
+	;
+
+%%
+
+    private Lexer lexer;
+    private AstPrinter ap;
+    public Parser(Reader reader) {
+        ap = new AstPrinter();
+        lexer = new Lexer(reader);
+    }
+    public void yyerror(String error) {
+        System.err.println("Error : " + error + " at line "
+            + lexer.getLine() + " column: " + lexer.getColumn());
+    }
+
+    public static void main(String args[]) throws IOException {
+        Parser parser;
+        if (args.length > 0) {
+          // parse a file
+            parser = new Parser(new FileReader(args[0]));
+        } else {
+          // interactive mode
+          System.out.println("[Quit with CTRL-D]");
+    	  parser = new Parser(new InputStreamReader(System.in));
+        }
+        parser.lexer.nextToken();
+        parser.parse();
+        System.out.println(parser.ap.print((Stmt)parser.yyrv));
+        System.out.println("Made by Karina@khs99");
+    }
