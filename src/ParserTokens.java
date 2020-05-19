@@ -1,4 +1,4 @@
-// Output created by jacc on Tue May 19 00:07:08 MSK 2020
+// Output created by jacc on Tue May 19 11:19:57 MSK 2020
 
 interface ParserTokens {
     int ENDINPUT = 0;

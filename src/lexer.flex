@@ -73,9 +73,11 @@ import com.ifmo.interpreter.*;
 /* whitespace */
 [ \n\r\t]+ {}
 
+/* ignore comment */
 "//"[^\n]* {}
 
 \b     { System.err.println("Sorry, backspace doesn't work"); }
 <<EOF>> {return ENDINPUT;}
 /* error fallback */
-[^]    { System.err.println("Error: unexpected character '"+yytext()+"'"); return -2; }
+[^]    { System.err.println("Scanner error: unexpected character '" +yytext() + "' at line "
+            + yyline + " column: " + yycolumn);return -2; }

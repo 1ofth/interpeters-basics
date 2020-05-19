@@ -1,4 +1,4 @@
-// Output created by jacc on Tue May 19 00:07:08 MSK 2020
+// Output created by jacc on Tue May 19 11:19:57 MSK 2020
 
 
 import java.io.*;
@@ -1283,12 +1283,15 @@ class Parser implements ParserTokens {
 
 
     private Lexer lexer;
-    private AstPrinter ap;
+    private AstPrettyPrinter ap;
+    private boolean hasError;
     public Parser(Reader reader) {
-        ap = new AstPrinter();
-        lexer = new Lexer(reader);
+        this.hasError = false;
+        this.ap = new AstPrettyPrinter();
+        this.lexer = new Lexer(reader);
     }
     public void yyerror(String error) {
+        this.hasError = true;
         System.err.println("Error : " + error + " at line "
             + lexer.getLine() + " column: " + lexer.getColumn());
     }
@@ -1305,7 +1308,9 @@ class Parser implements ParserTokens {
         }
         parser.lexer.nextToken();
         parser.parse();
-        System.out.println(parser.ap.print((Stmt)parser.yyrv));
+        if (!parser.hasError) {
+            System.out.println(parser.ap.print((Stmt)parser.yyrv));
+        }
         System.out.println("Made by Karina@khs99");
     }
 

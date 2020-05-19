@@ -66,12 +66,15 @@ symlist: NAME	{ $$ = new Expr.LiteralList($1); }
 %%
 
     private Lexer lexer;
-    private AstPrinter ap;
+    private AstPrettyPrinter ap;
+    private boolean hasError;
     public Parser(Reader reader) {
-        ap = new AstPrinter();
-        lexer = new Lexer(reader);
+        this.hasError = false;
+        this.ap = new AstPrettyPrinter();
+        this.lexer = new Lexer(reader);
     }
     public void yyerror(String error) {
+        this.hasError = true;
         System.err.println("Error : " + error + " at line "
             + lexer.getLine() + " column: " + lexer.getColumn());
     }
@@ -88,6 +91,8 @@ symlist: NAME	{ $$ = new Expr.LiteralList($1); }
         }
         parser.lexer.nextToken();
         parser.parse();
-        System.out.println(parser.ap.print((Stmt)parser.yyrv));
+        if (!parser.hasError) {
+            System.out.println(parser.ap.print((Stmt)parser.yyrv));
+        }
         System.out.println("Made by Karina@khs99");
     }

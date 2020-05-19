@@ -178,7 +178,7 @@ class Lexer implements ParserTokens {
   }
 
   /** the input device */
-  private Reader zzReader;
+  private java.io.Reader zzReader;
 
   /** the current state of the DFA */
   private int zzState;
@@ -256,7 +256,7 @@ class Lexer implements ParserTokens {
         try{
             token = yylex();
         }
-        catch (IOException e){
+        catch (java.io.IOException e){
             System.out.println(
                 "IO exception occured:\n" + e);
         }
@@ -270,7 +270,7 @@ class Lexer implements ParserTokens {
    *
    * @param   in  the java.io.Reader to read input from.
    */
-  Lexer(Reader in) {
+  Lexer(java.io.Reader in) {
     this.zzReader = in;
   }
 
@@ -299,9 +299,9 @@ class Lexer implements ParserTokens {
    *
    * @return      <code>false</code>, iff there was new input.
    * 
-   * @exception   IOException  if any I/O-Error occurs
+   * @exception   java.io.IOException  if any I/O-Error occurs
    */
-  private boolean zzRefill() throws IOException {
+  private boolean zzRefill() throws java.io.IOException {
 
     /* first: make room (if you can) */
     if (zzStartRead > 0) {
@@ -334,7 +334,7 @@ class Lexer implements ParserTokens {
 
     /* not supposed to occur according to specification of java.io.Reader */
     if (numRead == 0) {
-      throw new IOException("Reader returned 0 characters. See JFlex examples for workaround.");
+      throw new java.io.IOException("Reader returned 0 characters. See JFlex examples for workaround.");
     }
     if (numRead > 0) {
       zzEndRead += numRead;
@@ -359,7 +359,7 @@ class Lexer implements ParserTokens {
   /**
    * Closes the input stream.
    */
-  public final void yyclose() throws IOException {
+  public final void yyclose() throws java.io.IOException {
     zzAtEOF = true;            /* indicate end of file */
     zzEndRead = zzStartRead;  /* invalidate buffer    */
 
@@ -380,7 +380,7 @@ class Lexer implements ParserTokens {
    *
    * @param reader   the new input stream 
    */
-  public final void yyreset(Reader reader) {
+  public final void yyreset(java.io.Reader reader) {
     zzReader = reader;
     zzAtBOL  = true;
     zzAtEOF  = false;
@@ -493,9 +493,9 @@ class Lexer implements ParserTokens {
    * the end of input is encountered or an I/O-Error occurs.
    *
    * @return      the next token
-   * @exception   IOException  if any I/O-Error occurs
+   * @exception   java.io.IOException  if any I/O-Error occurs
    */
-  public int yylex() throws IOException {
+  public int yylex() throws java.io.IOException {
     int zzInput;
     int zzAction;
 
@@ -640,7 +640,8 @@ class Lexer implements ParserTokens {
       else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
           case 1: 
-            { System.err.println("Error: unexpected character '"+yytext()+"'"); return -2;
+            { System.err.println("Scanner error: unexpected character '" +yytext() + "' at line "
+            + yyline + " column: " + yycolumn);return -2;
             }
           case 13: break;
           case 2: 
